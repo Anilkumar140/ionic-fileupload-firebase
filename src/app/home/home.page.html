@@ -1,11 +1,29 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
+      <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+      </ion-buttons>
     <ion-title>
-      Ionic 5 Firebase File Upload Demo
+      DashBoard
     </ion-title>
   </ion-toolbar>
 </ion-header>
-
+<ion-tab-bar slot="bottom">
+  <ion-tab-button tab="account" (click)="details()">
+    <ion-icon name="cloud-upload-outline"></ion-icon>
+  </ion-tab-button>
+  <ion-tab-button tab="contact" (click)="showFiles()">
+    <ion-icon name="images-outline"></ion-icon>
+  </ion-tab-button>
+  <ion-tab-button tab="settings">
+    <ion-icon name="settings-outline"></ion-icon>
+  </ion-tab-button>
+</ion-tab-bar>
+<ion-header [translucent]="true">
+ 
+</ion-header>
+<ion-tabs>
+  
 <ion-content [fullscreen]="true">
   <div id="container">
 
@@ -19,12 +37,32 @@
         </ion-button>
       </ion-card-content>
     </ion-card>
-
-    <!-- File upload progress bar -->
     <div *ngIf="percentageVal | async as percentage">
       Progress: {{ percentage | number }}%
       <ion-progress-bar value="{{ percentage / 100 }}"></ion-progress-bar>
     </div>
+    <ion-card>
+      <ion-card-header>
+        <ion-card-subtitle>Your Images List</ion-card-subtitle>
+        <!-- <ion-card-title>Card Title</ion-card-title> -->
+      </ion-card-header>
+    
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let item of cloudFiles">
+            <ion-thumbnail slot="start">
+              <ion-img [src]="item.url"></ion-img>
+            </ion-thumbnail>
+            <ion-label>{{item.name}}</ion-label>
+            <ion-button slot="end" (click)="deleteFile(item.ref)" color="danger">
+              <ion-icon name="trash" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    
 
     <div *ngIf="trackSnapshot | async as snap">
       File size: {{ snap.totalBytes | formatFileSize }} 

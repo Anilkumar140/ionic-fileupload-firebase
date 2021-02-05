@@ -1,0 +1,25 @@
+<!-- <ion-card>
+  <ion-card-header>
+    <ion-card-title>List of Files</ion-card-title>
+  </ion-card-header>
+
+  <ion-card-content >
+  <ion-list >
+  <ion-item >
+    <ion-label *ngFor="let file of fileUploads"><app-upload-details [fileUpload]='file'></app-upload-details></ion-label>
+  </ion-item>
+  
+  </ion-list>
+  </ion-card-content>
+</ion-card> -->
+<div class="card">
+  <div class="card-header">List of Files</div>
+  <ul
+    class="list-group list-group-flush"
+    *ngFor="let file of fileUploads"
+  >
+    <li class="list-group-item">
+      <app-upload-details [fileUpload]='file'></app-upload-details>
+    </li>
+  </ul>
+</div>

@@ -14,25 +14,33 @@ import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireStorageModule } from '@angular/fire/storage';
 
 import { environment } from '../environments/environment';
+import { FileUploadService } from './services/file-upload.service';
+import { UploadDetailsComponent } from './home/components/upload-details/upload-details.component';
+import { UploadListComponent } from './home/components/upload-list/upload-list.component';
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [
+    AppComponent,
+    UploadDetailsComponent,
+    UploadListComponent],
   entryComponents: [],
   imports: [
-    BrowserModule, 
-    IonicModule.forRoot(), 
-    AppRoutingModule, 
+    BrowserModule,
+    IonicModule.forRoot(),
+    AppRoutingModule,
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFirestoreModule,
-    AngularFireStorageModule
+    AngularFireStorageModule,
+
   ],
   providers: [
     StatusBar,
     SplashScreen,
+    FileUploadService,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]
 })
 
-export class AppModule {}
+export class AppModule { }

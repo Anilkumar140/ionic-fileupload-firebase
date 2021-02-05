@@ -7,6 +7,9 @@ import { HomePage } from './home.page';
 import { HomePageRoutingModule } from './home-routing.module';
 
 import { FormatFileSizePipe } from './format-file-size.pipe';
+import { UploadListComponent } from './components/upload-list/upload-list.component';
+import { UploadDetailsComponent } from './components/upload-details/upload-details.component';
+
 
 
 @NgModule({
@@ -14,11 +17,14 @@ import { FormatFileSizePipe } from './format-file-size.pipe';
     CommonModule,
     FormsModule,
     IonicModule,
-    HomePageRoutingModule
+    HomePageRoutingModule,
+    
+
   ],
   declarations: [
     HomePage,
-    FormatFileSizePipe
+    FormatFileSizePipe,
+   
   ]
 })
-export class HomePageModule {}
+export class HomePageModule { }

@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { Observable } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
 import { AngularFireStorage, AngularFireUploadTask } from '@angular/fire/storage';
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
-
+import * as firebase from 'firebase/app';
 export interface imgFile {
   name: string;
   filepath: string;
@@ -17,8 +17,9 @@ export interface imgFile {
   styleUrls: ['home.page.scss'],
 })
 
-export class HomePage {
+export class HomePage implements OnInit {
 
+  // storageRef = firebase.storage().ref("gs://nodejsapi-b6fd9.appspot.com/filesStorage/");
   // File upload task 
   fileUploadTask: AngularFireUploadTask;
 
@@ -43,79 +44,108 @@ export class HomePage {
   isFileUploaded: boolean;
 
   private filesCollection: AngularFirestoreCollection<imgFile>;
-  
+  cloudFiles: any[];
+
   constructor(
     private afs: AngularFirestore,
     private afStorage: AngularFireStorage
   ) {
     this.isFileUploading = false;
     this.isFileUploaded = false;
-    
+
     // Define uploaded files collection
     this.filesCollection = afs.collection<imgFile>('imagesCollection');
     this.files = this.filesCollection.valueChanges();
   }
-
+  ngOnInit() {
+    this.loadFiles();
+  }
 
   uploadImage(event: FileList) {
-      
-      const file = event.item(0)
 
-      // Image validation
-      if (file.type.split('/')[0] !== 'image') { 
-        console.log('File type is not supported!')
-        return;
-      }
+    const file = event.item(0)
 
-      this.isFileUploading = true;
-      this.isFileUploaded = false;
+    // Image validation
+    if (file.type.split('/')[0] !== 'image') {
+      console.log('File type is not supported!')
+      return;
+    }
 
-      this.imgName = file.name;
+    this.isFileUploading = true;
+    this.isFileUploaded = false;
 
-      // Storage path
-      const fileStoragePath = `filesStorage/${new Date().getTime()}_${file.name}`;
+    this.imgName = file.name;
 
-      // Image reference
-      const imageRef = this.afStorage.ref(fileStoragePath);
+    // Storage path
+    const fileStoragePath = `filesStorage/${new Date().getTime()}_${file.name}`;
 
-      // File upload task
-      this.fileUploadTask = this.afStorage.upload(fileStoragePath, file);
+    // Image reference
+    const imageRef = this.afStorage.ref(fileStoragePath);
 
-      // Show uploading progress
-      this.percentageVal = this.fileUploadTask.percentageChanges();
-      this.trackSnapshot = this.fileUploadTask.snapshotChanges().pipe(
-        
-        finalize(() => {
-          // Retreive uploaded image storage path
-          this.UploadedImageURL = imageRef.getDownloadURL();
-          
-          this.UploadedImageURL.subscribe(resp=>{
-            this.storeFilesFirebase({
-              name: file.name,
-              filepath: resp,
-              size: this.imgSize
-            });
-            this.isFileUploading = false;
-            this.isFileUploaded = true;
-          },error=>{
-            console.log(error);
-          })
-        }),
-        tap(snap => {
-            this.imgSize = snap.totalBytes;
+    // File upload task
+    this.fileUploadTask = this.afStorage.upload(fileStoragePath, file);
+
+    // Show uploading progress
+    this.percentageVal = this.fileUploadTask.percentageChanges();
+    this.trackSnapshot = this.fileUploadTask.snapshotChanges().pipe(
+
+      finalize(() => {
+        // Retreive uploaded image storage path
+        this.UploadedImageURL = imageRef.getDownloadURL();
+
+        this.UploadedImageURL.subscribe(resp => {
+          this.storeFilesFirebase({
+            name: file.name,
+            filepath: resp,
+            size: this.imgSize
+          });
+          this.isFileUploading = false;
+          this.isFileUploaded = true;
+        }, error => {
+          console.log(error);
         })
-      )
+      }),
+      tap(snap => {
+        this.imgSize = snap.totalBytes;
+      })
+    )
   }
 
 
   storeFilesFirebase(image: imgFile) {
-      const fileId = this.afs.createId();
-      
-      this.filesCollection.doc(fileId).set(image).then(res => {
-        console.log(res);
-      }).catch(err => {
-        console.log(err);
-      });
-  }
+    const fileId = this.afs.createId();
 
+    this.filesCollection.doc(fileId).set(image).then(res => {
+      console.log(res);
+    }).catch(err => {
+      console.log(err);
+    });
+  }
+  details() {
+    window.location.href = "http://localhost:8100/list"
+  }
+  loadFiles() {
+    this.cloudFiles = [];
+
+    const storageRef = firebase.storage().refFromURL('gs://nodejsapi-b6fd9.appspot.com/filesStorage/');
+    
+    storageRef.listAll().then(result => {
+      result.items.forEach(async ref => {
+        this.cloudFiles.push({
+          name: ref.name,
+          full: ref.fullPath,
+          url: await ref.getDownloadURL(),
+          ref: ref
+        });
+      });
+    });
+  }
+  showFiles() {
+    console.log(this.cloudFiles);
+  }
+  deleteFile(ref: firebase.storage.Reference) {
+    ref.delete().then(() => {
+      this.loadFiles();
+    });
+  }
 }
